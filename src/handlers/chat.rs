@@ -13,7 +13,10 @@ use tokio::sync::mpsc;
 
 #[derive(Deserialize)]
 pub struct ChatRequest {
-    prompt: String,
+    pub prompt: String,
+    pub temperature: Option<f32>,
+    pub top_p: Option<f32>,
+    pub max_tokens: Option<usize>,
 }
 
 pub async fn handle_chat(
@@ -25,6 +28,9 @@ pub async fn handle_chat(
     let request = InferenceRequest {
         prompt: payload.prompt,
         response_tx: tx,
+        temperature: payload.temperature.unwrap_or(0.7),
+        top_p: payload.top_p.unwrap_or(0.9),
+        max_tokens: payload.max_tokens.unwrap_or(128),
     };
 
     let _ = state.engine_tx.send(request).await;

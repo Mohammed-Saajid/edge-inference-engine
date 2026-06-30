@@ -32,6 +32,9 @@ async fn main() {
         .await
         .unwrap();
 
-    println!("Server operating dynamically at http://{}", shared_state.config.server_address);
+    println!(
+        "Server operating dynamically at http://{}",
+        shared_state.config.server_address
+    );
     axum::serve(listener, app).await.unwrap();
 }

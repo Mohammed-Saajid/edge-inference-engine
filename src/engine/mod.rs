@@ -10,6 +10,9 @@ use tokio::sync::mpsc;
 pub struct InferenceRequest {
     pub prompt: String,
     pub response_tx: mpsc::Sender<String>,
+    pub temperature: f32,
+    pub top_p: f32,
+    pub max_tokens: usize,
 }
 
 pub struct EdgeEngine {

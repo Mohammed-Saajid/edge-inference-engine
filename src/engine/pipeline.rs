@@ -1,6 +1,6 @@
 use encoding_rs::UTF_8;
 use llama_cpp_2::{
-    context::{params::LlamaContextParams},
+    context::params::LlamaContextParams,
     llama_backend::LlamaBackend,
     llama_batch::LlamaBatch,
     model::{AddBos, LlamaModel},
@@ -35,10 +35,17 @@ pub fn execute_inference(
     ctx.decode(&mut batch)?;
 
     let mut current_token = prompt_tokens.len();
-    let max_tokens = 128;
-    let mut sampler = LlamaSampler::chain_simple([LlamaSampler::greedy()]);
+    let mut sampler = if request.top_p <= 0.0 {
+        LlamaSampler::chain_simple([LlamaSampler::greedy()])
+    } else {
+        LlamaSampler::chain_simple([
+            LlamaSampler::temp(request.temperature),
+            LlamaSampler::top_p(request.top_p, 1),
+            LlamaSampler::dist(42),
+        ])
+    };
 
-    while current_token < max_tokens {
+    while current_token < request.max_tokens {
         let new_token_id = sampler.sample(&ctx, batch.n_tokens() - 1);
 
         if model.is_eog_token(new_token_id) {
