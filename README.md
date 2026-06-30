@@ -88,10 +88,21 @@ The engine relies on a strict separation of concerns between I/O bound tasks and
 
 ```json
 {
-    "prompt": "Write a short haiku about edge AI."
+    "prompt": "Write a short haiku about edge AI.",
+    "temperature": 0.7,
+    "top_p": 0.9,
+    "max_tokens": 128
 }
-
 ```
+
+**Request Parameters:**
+
+| Parameter | Type | Optional | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `prompt` | string | No | — | The input text to complete |
+| `temperature` | float | Yes | 0.7 | Sampling temperature (0.0 = deterministic, higher = more random) |
+| `top_p` | float | Yes | 0.9 | Nucleus sampling parameter |
+| `max_tokens` | integer | Yes | 128 | Maximum tokens to generate |
 
 **Response Type:** `text/event-stream`
 
@@ -102,8 +113,12 @@ Execute a raw streaming request using `curl` (the `-N` flag disables output buff
 ```bash
 curl -N -X POST http://127.0.0.1:3000/v1/chat/completions \
     -H "Content-Type: application/json" \
-    -d '{"prompt":"Explain edge inference in 3 words."}'
-
+    -d '{
+      "prompt": "Explain edge inference in 3 words.",
+      "temperature": 0.7,
+      "top_p": 0.9,
+      "max_tokens": 256
+    }'
 ```
 
 **Expected Stream Output:**
@@ -119,13 +134,18 @@ data: power
 
 ## Current Runtime Configuration
 
-The following parameters are hardcoded in the initial source code release:
+The following parameters are configured during initialization:
 
 * **Model Path:** `models/qwen2.5-0.5b-instruct-q4_k_m.gguf`
 * **Network Interface:** `127.0.0.1:3000`
 * **Matrix Math Allocation:** `4` CPU threads via `LlamaContextParams`
-* **Generation Horizon:** Maximum `128` tokens per request sequence
-* **Sampling Strategy:** Pure greedy decoding (top probability choice)
+* **Channel Capacity:** `32` pending inference requests
+
+**Request Generation Defaults:**
+
+* **Temperature:** `0.7`
+* **Top-p:** `0.9`
+* **Max Tokens:** `128`
 
 ## System Limitations
 
@@ -138,7 +158,6 @@ The following parameters are hardcoded in the initial source code release:
 
 ## Roadmap
 
-* [ ] Support dynamic generation parameters (`temperature`, `top_p`, `max_tokens`) within the request body.
 * [ ] Implement full OpenAI-compatible request/response schemas (`/v1/chat/completions` compliant fields).
 * [ ] Move system constants to environment variables or command-line flags (`clap`).
 * [ ] Add dedicated health checking (`/healthz`) and system telemetry tracking.
