@@ -19,19 +19,19 @@ async fn main() {
 
     // Encapsulate Central Application State Context
     let shared_state = Arc::new(AppState {
-        config: config.clone(),
+        config: config,
         engine_tx,
     });
 
     // Bind HTTP Architecture Layers
     let app = Router::new()
         .route("/v1/chat/completions", post(handlers::handle_chat))
-        .with_state(shared_state);
+        .with_state(shared_state.clone());
 
-    let listener = tokio::net::TcpListener::bind(config.server_address)
+    let listener = tokio::net::TcpListener::bind(shared_state.config.server_address)
         .await
         .unwrap();
 
-    println!("Server operating dynamically at http://{}", config.server_address);
+    println!("Server operating dynamically at http://{}", shared_state.config.server_address);
     axum::serve(listener, app).await.unwrap();
 }
