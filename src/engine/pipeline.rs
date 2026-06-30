@@ -1,8 +1,6 @@
-use axum::http::request;
 use encoding_rs::UTF_8;
-use futures_util::future::UnwrapOrElse;
 use llama_cpp_2::{
-    context::{LlamaContext, params::LlamaContextParams},
+    context::{params::LlamaContextParams},
     llama_backend::LlamaBackend,
     llama_batch::LlamaBatch,
     model::{AddBos, LlamaModel},
